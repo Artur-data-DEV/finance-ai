@@ -13,3 +13,79 @@ datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
 }
+
+model Transaction {
+  id            String                   @id @default(cuid())
+  name          String?
+  type          TransactionType
+  amount        Decimal                  @db.Decimal(10, 2)
+  category      TransactionCategory
+  description   String?
+  date          DateTime                 @default(now())
+  paymentMethod TransactionPaymentMethod
+  accountId     String
+  account       Account                  @relation(fields: [accountId], references: [id])
+  createdAt     DateTime                 @default(now())
+  updatedAt     DateTime                 @updatedAt
+}
+
+enum TransactionType {
+  DEPOSIT
+  EXPENSE
+  INVESTIMENT
+}
+
+enum TransactionCategory {
+  FOOD
+  HOUSING
+  TRANSPORTATION
+  UTILITIES
+  ENTERTAINMENT
+  HEALTHCARE
+  EDUCATION
+  GROCERIES
+  RENT
+  SALARY
+  INVESTMENTS
+  OTHER
+}
+
+enum TransactionPaymentMethod {
+  CASH
+  CREDIT_CARD
+  DEBIT_CARD
+  BANK_TRANSFER
+  PIX
+  BANK_SLIP
+  MOBILE_PAYMENT
+  CHECK
+  OTHER
+}
+
+model Account {
+  id           String        @id @default(cuid())
+  name         String
+  type         AccountType
+  balance      Float         @default(0)
+  userId       String
+  user         User          @relation(fields: [userId], references: [id])
+  transactions Transaction[]
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+}
+
+enum AccountType {
+  CHECKING
+  SAVINGS
+  CREDIT
+  INVESTMENT
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  accounts  Account[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
